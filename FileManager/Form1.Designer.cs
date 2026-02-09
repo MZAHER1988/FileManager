@@ -53,7 +53,7 @@
             this.backButton.TabIndex = 0;
             this.backButton.Text = "Back";
             this.backButton.UseVisualStyleBackColor = true;
-            this.backButton.Click += new System.EventHandler(this.backButton_Click);
+            this.backButton.Click += new System.EventHandler(this.BackButton_Click);
             // 
             // listView1
             // 
@@ -68,24 +68,36 @@
             this.listView1.SmallImageList = this.iconList;
             this.listView1.TabIndex = 2;
             this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView1_ItemSelectionChanged);
-            this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDoubleClick);
+            this.listView1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.ListView1_ItemSelectionChanged);
+            this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ListView1_MouseDoubleClick);
             // 
             // iconList
             // 
             this.iconList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("iconList.ImageStream")));
             this.iconList.TransparentColor = System.Drawing.Color.Transparent;
-            this.iconList.Images.SetKeyName(0, "folder.png.png");
-            this.iconList.Images.SetKeyName(1, "folder2.png.png");
+            this.iconList.Images.SetKeyName(0, "txt-file.png");
+            this.iconList.Images.SetKeyName(1, "zip.png");
             this.iconList.Images.SetKeyName(2, "file.png.png");
-            this.iconList.Images.SetKeyName(3, "doc2.png.png");
+            this.iconList.Images.SetKeyName(3, "doc.png");
             this.iconList.Images.SetKeyName(4, "pdf.png.png");
-            this.iconList.Images.SetKeyName(5, "mp3.png.png");
+            this.iconList.Images.SetKeyName(5, "mp3.png");
             this.iconList.Images.SetKeyName(6, "mp4.png.png");
             this.iconList.Images.SetKeyName(7, "exe,png.png");
-            this.iconList.Images.SetKeyName(8, "unknown.png.png");
-            this.iconList.Images.SetKeyName(9, "png.png.png");
-            this.iconList.Images.SetKeyName(10, "folder64.png.png");
+            this.iconList.Images.SetKeyName(8, "image.png");
+            this.iconList.Images.SetKeyName(9, "extension.png");
+            this.iconList.Images.SetKeyName(10, "xlsx.png");
+            this.iconList.Images.SetKeyName(11, "csv.png");
+            this.iconList.Images.SetKeyName(12, "ppt.png");
+            this.iconList.Images.SetKeyName(13, "html.png");
+            this.iconList.Images.SetKeyName(14, "css.png");
+            this.iconList.Images.SetKeyName(15, "js-file.png");
+            this.iconList.Images.SetKeyName(16, "json-file.png");
+            this.iconList.Images.SetKeyName(17, "xml.png");
+            this.iconList.Images.SetKeyName(18, "py.png");
+            this.iconList.Images.SetKeyName(19, "rar (1).png");
+            this.iconList.Images.SetKeyName(20, "folder.png.png");
+            this.iconList.Images.SetKeyName(21, "unknown.png.png");
+            this.iconList.Images.SetKeyName(22, "hard-drive.png");
             // 
             // filePathTextBox
             // 
@@ -141,7 +153,7 @@
             this.goButton.TabIndex = 1;
             this.goButton.Text = "Go";
             this.goButton.UseVisualStyleBackColor = true;
-            this.goButton.Click += new System.EventHandler(this.goButton_Click);
+            this.goButton.Click += new System.EventHandler(this.GoButton_Click);
             // 
             // newFolderButton
             // 
@@ -152,7 +164,7 @@
             this.newFolderButton.TabIndex = 8;
             this.newFolderButton.Text = "New Folder";
             this.newFolderButton.UseVisualStyleBackColor = true;
-            this.newFolderButton.Click += new System.EventHandler(this.newFolderButton_Click);
+            this.newFolderButton.Click += new System.EventHandler(this.NewFolderButton_Click);
             // 
             // newFileButton
             // 
@@ -163,7 +175,7 @@
             this.newFileButton.TabIndex = 9;
             this.newFileButton.Text = "New File";
             this.newFileButton.UseVisualStyleBackColor = true;
-            this.newFileButton.Click += new System.EventHandler(this.newFileButton_Click);
+            this.newFileButton.Click += new System.EventHandler(this.NewFileButton_Click);
             // 
             // renameButton
             // 
@@ -174,7 +186,7 @@
             this.renameButton.TabIndex = 10;
             this.renameButton.Text = "Rename";
             this.renameButton.UseVisualStyleBackColor = true;
-            this.renameButton.Click += new System.EventHandler(this.renameButton_Click);
+            this.renameButton.Click += new System.EventHandler(this.RenameButton_Click);
             // 
             // deleteButton
             // 
@@ -185,7 +197,7 @@
             this.deleteButton.TabIndex = 11;
             this.deleteButton.Text = "Delete";
             this.deleteButton.UseVisualStyleBackColor = true;
-            this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
+            this.deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
             // Form1
             // 

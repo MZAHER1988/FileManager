@@ -1,14 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 
@@ -16,12 +8,11 @@ namespace FileManager
 {
     public partial class Form1 : Form
     {
-        //private readonly string filePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\")); // Set the initial file path to the project directory , four levels up from the executable directory
-        //private string filePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
         private string filePath = @"C:\";
-        public bool isFile = false;
         private string currentlySelectedItemName = "";
+        string previousFilePath = "";                                   // Variable to store the previous file path for error handling and navigation purposes
+        private bool showingDrives = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -30,147 +21,244 @@ namespace FileManager
         private void Form1_Load(object sender, EventArgs e)
         {
             filePathTextBox.Text = filePath;
-            loadFilesAndDirectories();
+            LoadFilesAndDirectories();
         }
 
-        public void loadFilesAndDirectories()
+        public void ShowDrives()
         {
-            DirectoryInfo fileList;
-            FileAttributes fileAttr;
+            showingDrives = true;
+            listView1.BeginUpdate();
+            listView1.Items.Clear();
+
+            DriveInfo[] drives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo drive in drives)
+            {
+                try
+                {
+                    listView1.Items.Add(drive.Name, 22);
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+            listView1.EndUpdate();
+            filePathTextBox.Text = "This PC";
+            currentlySelectedItemName = "";
+            FileNameLabel.Text = "";
+            FileTypeLabel.Text = "";
+        }
+
+        public void LoadFilesAndDirectories()
+        {
+            bool isBeginUpdateCalled = false;                       // Flag to track if BeginUpdate has been called, to ensure EndUpdate is called appropriately
             try
             {
-                fileAttr = File.GetAttributes(filePath);        // Get the attributes of the current path
-
-                if ((fileAttr & FileAttributes.Directory) == FileAttributes.Directory)
+                if (!Directory.Exists(filePath))
                 {
+                    MessageBox.Show("Folder does not exist.");
+                    return;
+                }
 
-                    fileList = new DirectoryInfo(filePath);                         // Create a DirectoryInfo object for the specified path
-                    FileInfo[] files = fileList.GetFiles();                         // Get all files in the directory
-                    DirectoryInfo[] directories = fileList.GetDirectories();        // Get all subdirectories in the directory
-                    string fileExtension = "";
-                    listView1.Items.Clear();
+                showingDrives = false;                                          // Reset the flag when loading a specific directory, as we are no longer showing drives
+                DirectoryInfo fileList = new DirectoryInfo(filePath);           // Create a DirectoryInfo object for the specified path
+                FileInfo[] files = fileList.GetFiles();                         // Get all files in the directory
+                DirectoryInfo[] directories = fileList.GetDirectories();        // Get all subdirectories in the directory
+                string fileExtension = "";                                      // Variable to hold the file extension for determining the appropriate icon
+                listView1.BeginUpdate();
+                isBeginUpdateCalled = true;                                     // Set the flag to indicate that BeginUpdate has been called
+                listView1.Items.Clear();
 
-
-                    for (int i = 0; i < files.Length; i++)
+                // Add directories to the ListView with folder icon
+                for (int i = 0; i < directories.Length; i++)
+                {
+                    try
                     {
-                        fileExtension = files[i].Extension.ToUpper();
+                        listView1.Items.Add(directories[i].Name, 20);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        continue;
+                    }
+                    catch (IOException)
+                    {
+                        continue;
+                    }
+                }
+                // Add files to the ListView with appropriate icons based on file type
+                for (int i = 0; i < files.Length; i++)
+                {
+                    try
+                    {
+                        fileExtension = (files[i].Extension ?? "").ToUpperInvariant();
+                        int imageIndex = 21;                     // Default icon index for unknown file types
+
                         switch (fileExtension)
                         {
+                            case ".TXT":
+                                imageIndex = 0;
+                                break;
+
+                            case ".ZIP":
+                                imageIndex = 1;
+                                break;
+
+                            case ".GIF":
+                                imageIndex = 2;
+                                break;
+
+                            case ".DOC":
+                            case ".DOCX":
+                                imageIndex = 3;
+                                break;
+
+                            case ".PDF":
+                                imageIndex = 4;
+                                break;
+
                             case ".MP3":
                             case ".MP2":
-                                listView1.Items.Add(files[i].Name, 5);
-
+                                imageIndex = 5;
                                 break;
-                            case ".EXE":
-                            case ".COM":
-                                listView1.Items.Add(files[i].Name, 7);
 
-                                break;
                             case ".MP4":
                             case ".AVI":
                             case ".MKV":
-                                listView1.Items.Add(files[i].Name, 6);
+                                imageIndex = 6;
                                 break;
-                            case ".PDF":
-                                listView1.Items.Add(files[i].Name, 4);
 
+                            case ".EXE":
+                            case ".COM":
+                                imageIndex = 7;
                                 break;
-                            case ".DOC":
-                            case ".DOCX":
-                                listView1.Items.Add(files[i].Name, 3);
-                                break;
+
                             case ".PNG":
                             case ".JPG":
                             case ".JPEG":
-                                listView1.Items.Add(files[i].Name, 9);
+                            case ".BMP":
+                                imageIndex = 8;
                                 break;
 
-                            default:
-                                listView1.Items.Add(files[i].Name, 8);
+                            case ".CS":
+                                imageIndex = 9;
+                                break;
 
+                            case ".XLS":
+                            case ".XLSX":
+                                imageIndex = 10;
+                                break;
+
+                            case ".CSV":
+                                imageIndex = 11;
+                                break;
+
+                            case ".PPT":
+                            case ".PPTX":
+                                imageIndex = 12;
+                                break;
+
+                            case ".HTML":
+                                imageIndex = 13;
+                                break;
+
+                            case ".CSS":
+                                imageIndex = 14;
+                                break;
+
+                            case ".JS":
+                                imageIndex = 15;
+                                break;
+
+                            case ".JSON":
+                                imageIndex = 16;
+                                break;
+
+                            case ".XML":
+                                imageIndex = 17;
+                                break;
+
+                            case ".PY":
+                                imageIndex = 18;
+                                break;
+
+                            case ".RAR":
+                                imageIndex = 19;
                                 break;
                         }
-
+                        listView1.Items.Add(files[i].Name, imageIndex);
                     }
-                    for (int i = 0; i < directories.Length; i++)
+                    catch (UnauthorizedAccessException)
                     {
-                        listView1.Items.Add(directories[i].Name, 10);
+                        continue;
+                    }
+                    catch (IOException)
+                    {
+                        continue;
                     }
                 }
-                else
-                {
-                    FileNameLabel.Text = this.currentlySelectedItemName;
-                }
-
+                filePathTextBox.Text = filePath;            // Update the text box to reflect the current path
+                currentlySelectedItemName = "";             // Clear the currently selected item name when loading a new directory
+                FileNameLabel.Text = "";                    // Clear the file name label when loading a new directory
+                FileTypeLabel.Text = "";                    // Clear the file type label when loading a new directory
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("You do not have permission to access this folder.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                filePath = previousFilePath;                // Revert to the previous file path if access is denied
+                filePathTextBox.Text = filePath;            // Update the text box to reflect the reverted path
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-        }
-        public void loadButtonAction()
-        {
-
-            // Om en MAPP är markerad: navigera till den (sätt rutan först)
-            if (!string.IsNullOrEmpty(currentlySelectedItemName))
+            finally
             {
-                string selectedPath = Path.Combine(filePath, currentlySelectedItemName);
-                if (Directory.Exists(selectedPath))
+                if (isBeginUpdateCalled)
                 {
-                    filePathTextBox.Text = selectedPath;
+                    listView1.EndUpdate();                  // Ensure that the ListView is updated after loading files and directories
                 }
-                // Om en FIL är markerad gör vi inget här – "Gå" ska navigera, inte öppna filer
             }
+        }
 
-            removeBackSlash(); // städar textboxen (utan att sabba C:\)
 
-            string input = filePathTextBox.Text;
+        public void LoadButtonAction()
+        {
+            RemoveBackSlash();
+            string input = (filePathTextBox.Text ?? "").Trim(); // Safely trim the text box input, handling null values
+
             if (!Directory.Exists(input))
             {
-                MessageBox.Show("Please enter or select a valid folder path.");
+                MessageBox.Show("Please enter or select a valid folder path.", "Wrong", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
+            previousFilePath = filePath; // Store the current file path before attempting to load the new path, used for error handling and navigation purposes
             filePath = input;
-            isFile = false;
-            loadFilesAndDirectories();
-
-
-
-            // removeBackSlash();
-            // filePath = filePathTextBox.Text;  
-            // isFile = false;
-            // loadFilesAndDirectories();
+            LoadFilesAndDirectories();
         }
 
-        public void backButtonAction()
+        public void BackButtonAction()
         {
             try
             {
+                if (!Directory.Exists(filePath))
+                {
+                    MessageBox.Show("Current path is invalid. Cannot navigate back.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 // Alternative approach using Directory.GetParent
                 DirectoryInfo parentDir = Directory.GetParent(filePath);                    // Get the parent directory of the current path
                 if (parentDir != null)                                                      // Check if the parent directory exists
                 {
-                    //removeBackSlash();
+                    previousFilePath = filePath;                                            // Store the current file path before navigating up, used for error handling and navigation purposes
                     filePath = parentDir.FullName;                                          // Update the filePath variable to the parent directory's full path
                     filePathTextBox.Text = filePath;                                        // Update the text box to reflect the new path
-                    isFile = false;                                                         // Reset the isFile flag when navigating up
-                    loadFilesAndDirectories();                                              // Load the files and directories in the new path
-                    //removeBackSlash();
-                    //loadFilesAndDirectories();
-
+                    LoadFilesAndDirectories();                                              // Load the files and directories in the new path
                 }
                 else
-                {
-                    filePath = "";
-                    filePathTextBox.Text = filePath;
-
-                    //isFile = false;
-                    loadFilesAndDirectories();
-                    MessageBox.Show("No parent directory found.");
+                {        
+                    ShowDrives();
                 }
-
             }
             catch (Exception ex)
             {
@@ -178,26 +266,41 @@ namespace FileManager
             }
         }
 
-        public void removeBackSlash()
+        public void RemoveBackSlash()
         {
-            string path = filePathTextBox.Text;
+            //string path = filePathTextBox.Text.Trim();
+            string path = (filePathTextBox.Text ?? "").Trim(); // Safely trim the text box input, handling null values
 
-
-            if (path.EndsWith("/") || path.EndsWith("\\"))
+            if (string.IsNullOrEmpty(path))
             {
-                filePath = filePath.Substring(0, filePath.Length - 1);
+                // If the path is empty after trimming, do nothing and return
+                return;
             }
+
+            string root = Path.GetPathRoot(path);                       // Get the root of the path (e.g., "C:\")
+            if (!string.IsNullOrEmpty(root) && string.Equals(path, root, StringComparison.OrdinalIgnoreCase))
+            {
+                filePathTextBox.Text = root;
+                return;
+            }
+            path = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar); // Remove trailing slashes
+            filePathTextBox.Text = path;
         }
-        private void goButton_Click(object sender, EventArgs e)
-        {
-            //loadButtonAction();
 
-            listView1_MouseDoubleClick(this, null);     // Simulate a double-click event to open the selected item after navigating to a new path
+        private void GoButton_Click(object sender, EventArgs e)
+        {
+            LoadButtonAction();
         }
 
-        private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        private void ListView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-
+            if (showingDrives)
+            {
+                currentlySelectedItemName = e.Item.Text; // Get the name of the currently selected drive in the list view
+                FileNameLabel.Text = e.Item.Text;
+                FileTypeLabel.Text = "Drive";
+                return;
+            }
             if (e.IsSelected == false)
             {
                 // If the item is not selected, do nothing and return
@@ -209,50 +312,63 @@ namespace FileManager
 
             if (Directory.Exists(fullPath))
             {
-                isFile = false;
                 FileNameLabel.Text = e.Item.Text;
                 FileTypeLabel.Text = "Folder";
             }
             else if (File.Exists(fullPath))
             {
-                isFile = true;
                 var fi = new FileInfo(fullPath);
                 FileNameLabel.Text = fi.Name;
                 FileTypeLabel.Text = fi.Extension;
             }
             else
             {
-                isFile = false; // okänt
                 FileNameLabel.Text = "";
                 FileTypeLabel.Text = "";
             }
         }
 
-        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void ListView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            //loadButtonAction();
-            //string tempFilePath = "";
-
             if (string.IsNullOrEmpty(currentlySelectedItemName)) return;
+
+            if (showingDrives)
+            {
+                string driveRoot = currentlySelectedItemName; // Assuming the drive name is in the format "C:\"
+                
+                
+                    if (Directory.Exists(driveRoot))
+                    {
+                        showingDrives = false;
+                        previousFilePath = filePath; // Store the current file path before navigating into the new directory, used for error handling and navigation purposes
+                        filePath = driveRoot;
+                        filePathTextBox.Text = filePath;
+                        LoadFilesAndDirectories();
+                    }
+                    else
+                    {
+                        MessageBox.Show("The selected drive is not accessible.");
+                    }             
+                return;
+            }
 
             string fullPath = Path.Combine(filePath, currentlySelectedItemName);
 
             if (Directory.Exists(fullPath))
             {
-                // Navigera in i mappen
+                previousFilePath = filePath; // Store the current file path before navigating into the new directory, used for error handling and navigation purposes
+
                 filePath = fullPath;
                 filePathTextBox.Text = filePath;
-                isFile = false;
-                loadFilesAndDirectories();
+                LoadFilesAndDirectories();
             }
             else if (File.Exists(fullPath))
             {
-
-                // Öppna filen med standardprogram
                 try
                 {
-                    Process.Start(new ProcessStartInfo(fullPath) { UseShellExecute = true });       // Open the file with the default associated application, UseShellExecute is required for .NET Core and .NET 5+ , for .NET Framework it can be omitted, but it's good practice to include it for compatibility
-
+                    // Open the file with the default associated application, UseShellExecute is required for .NET Core and .NET 5+,
+                    // for .NET Framework it can be omitted, but it's good practice to include it for compatibility
+                    Process.Start(new ProcessStartInfo(fullPath) { UseShellExecute = true });
                 }
                 catch (Exception ex)
                 {
@@ -262,14 +378,18 @@ namespace FileManager
             return;
         }
 
-        private void backButton_Click(object sender, EventArgs e)
+        private void BackButton_Click(object sender, EventArgs e)
         {
-            backButtonAction();
-            //loadButtonAction();
+            BackButtonAction();
         }
 
-        private void newFolderButton_Click(object sender, EventArgs e)
+        private void NewFolderButton_Click(object sender, EventArgs e)
         {
+            if (showingDrives)
+            {
+                MessageBox.Show("Cannot create folders in drives. Please select a folder to create a new folder.");
+                return;
+            }
             string newFolder = "New folder";        // Default name for the new folder, can be modified to take user input
             string targetPath = Path.Combine(filePath, newFolder);  // Construct the full path for the new folder, combining the current path and the new folder name
 
@@ -301,7 +421,7 @@ namespace FileManager
                 try
                 {
                     Directory.CreateDirectory(targetPath);  // Create the new directory at the specified path, will throw an exception if it fails
-                    loadFilesAndDirectories();
+                    LoadFilesAndDirectories();
                 }
                 catch (Exception ex)
                 {
@@ -312,8 +432,13 @@ namespace FileManager
 
         }
 
-        private void newFileButton_Click(object sender, EventArgs e)
+        private void NewFileButton_Click(object sender, EventArgs e)
         {
+            if (showingDrives)
+            {
+                MessageBox.Show("Cannot create files in drives. Please select a folder to create a new file.");
+                return;
+            }
             if (!Directory.Exists(filePath))                                                                    // Check if the current path exists and is a valid directory
             {
                 MessageBox.Show("Please select a valid folder first.");
@@ -348,20 +473,23 @@ namespace FileManager
                     using (FileStream fs = File.Create(targetPath))                                            // Create the new file at the specified path, will throw an exception if it fails
                     {
                     }
-                    loadFilesAndDirectories();
+                    LoadFilesAndDirectories();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error creating new file: " + ex.Message);
                 }
-
                 break;
             }
-
         }
 
-        private void renameButton_Click(object sender, EventArgs e)
+        private void RenameButton_Click(object sender, EventArgs e)
         {
+            if (showingDrives)
+            {
+                MessageBox.Show("Cannot rename drives. Please select a file or folder to rename.");
+                return;
+            }
             if (string.IsNullOrEmpty(currentlySelectedItemName))                            // Check if an item is selected in the list view
             {
                 MessageBox.Show("Please select a file or folder to rename.");
@@ -374,14 +502,15 @@ namespace FileManager
             if (!isDirectory && !isFile)                                                    // If the selected item does not exist, show an error message
             {
                 MessageBox.Show("The selected item does not exist.");
-                loadFilesAndDirectories();
+                LoadFilesAndDirectories();
                 return;
             }
 
             while (true)
             {
-                string newName = Interaction.InputBox("Enter the new name for the selected item:", "Rename Item", currentlySelectedItemName);   // Prompt the user to enter the new name for the selected item, with the current name as default value, can be modified to take user input, using Microsoft.VisualBasic, requires adding reference to Microsoft.VisualBasic
-
+                // Prompt the user to enter the new name for the selected item, with the current name as default value, can be modified to take user input,
+                // using Microsoft.VisualBasic, requires adding reference to Microsoft.VisualBasic
+                string newName = Interaction.InputBox("Enter the new name for the selected item:", "Rename Item", currentlySelectedItemName);
 
                 if (string.IsNullOrWhiteSpace(newName))
                 {
@@ -416,20 +545,24 @@ namespace FileManager
                     {
                         File.Move(oldPath, newPath);                                            // Rename the file
                     }
-                    currentlySelectedItemName = newName;                                        // Update the currently selected item name to the new name
-                    loadFilesAndDirectories();                                                  // Reload the files and directories to reflect the change
+                    LoadFilesAndDirectories();                                                  // Reload the files and directories to reflect the change
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error renaming item: " + ex.Message);
                 }
-                loadFilesAndDirectories();
                 break;
             }
         }
 
-        private void deleteButton_Click(object sender, EventArgs e)
+        private void DeleteButton_Click(object sender, EventArgs e)
         {
+            if (showingDrives)
+            {
+                MessageBox.Show("Cannot delete drives. Please select a file or folder to delete.");
+                return;
+            }
+
             if (string.IsNullOrEmpty(currentlySelectedItemName))                                    // Check if an item is selected in the list view
             {
                 MessageBox.Show("Please select a file or folder to delete.");
@@ -441,14 +574,13 @@ namespace FileManager
             if (!isDirectory && !isFile)                                                            // If the selected item does not exist, show an error message
             {
                 MessageBox.Show("The selected item does not exist.");
-                loadFilesAndDirectories();
+                LoadFilesAndDirectories();
                 return;
             }
             DialogResult result = MessageBox.Show($"Are you sure you want to delete '{currentlySelectedItemName}'?",
                                                    "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result != DialogResult.Yes)
             {
-                // Proceed with deletion
                 return;
             }
             try
@@ -461,8 +593,7 @@ namespace FileManager
                 {
                     File.Delete(targetPath);                                                    // Delete the file
                 }
-                currentlySelectedItemName = "";                                                 // Clear the currently selected item name
-                loadFilesAndDirectories();                                                      // Reload the files and directories to reflect the change
+                LoadFilesAndDirectories();                                                      // Reload the files and directories to reflect the change
             }
             catch (Exception ex)
             {
