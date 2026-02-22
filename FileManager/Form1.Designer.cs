@@ -43,6 +43,9 @@
             this.newFileButton = new System.Windows.Forms.Button();
             this.renameButton = new System.Windows.Forms.Button();
             this.deleteButton = new System.Windows.Forms.Button();
+            this.Btn_copy = new System.Windows.Forms.Button();
+            this.Btn_cut = new System.Windows.Forms.Button();
+            this.Btn_paste = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // backButton
@@ -199,11 +202,44 @@
             this.deleteButton.UseVisualStyleBackColor = true;
             this.deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
+            // Btn_copy
+            // 
+            this.Btn_copy.Location = new System.Drawing.Point(314, 50);
+            this.Btn_copy.Name = "Btn_copy";
+            this.Btn_copy.Size = new System.Drawing.Size(114, 23);
+            this.Btn_copy.TabIndex = 12;
+            this.Btn_copy.Text = "Copy";
+            this.Btn_copy.UseVisualStyleBackColor = true;
+            this.Btn_copy.Click += new System.EventHandler(this.Btn_copy_Click);
+            // 
+            // Btn_cut
+            // 
+            this.Btn_cut.Location = new System.Drawing.Point(434, 49);
+            this.Btn_cut.Name = "Btn_cut";
+            this.Btn_cut.Size = new System.Drawing.Size(114, 23);
+            this.Btn_cut.TabIndex = 13;
+            this.Btn_cut.Text = "Cut";
+            this.Btn_cut.UseVisualStyleBackColor = true;
+            this.Btn_cut.Click += new System.EventHandler(this.Btn_cut_Click);
+            // 
+            // Btn_paste
+            // 
+            this.Btn_paste.Location = new System.Drawing.Point(554, 50);
+            this.Btn_paste.Name = "Btn_paste";
+            this.Btn_paste.Size = new System.Drawing.Size(114, 23);
+            this.Btn_paste.TabIndex = 14;
+            this.Btn_paste.Text = "Paste";
+            this.Btn_paste.UseVisualStyleBackColor = true;
+            this.Btn_paste.Click += new System.EventHandler(this.Btn_paste_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.Btn_paste);
+            this.Controls.Add(this.Btn_cut);
+            this.Controls.Add(this.Btn_copy);
             this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.renameButton);
             this.Controls.Add(this.newFileButton);
@@ -239,6 +275,9 @@
         private System.Windows.Forms.Button newFileButton;
         private System.Windows.Forms.Button renameButton;
         private System.Windows.Forms.Button deleteButton;
+        private System.Windows.Forms.Button Btn_copy;
+        private System.Windows.Forms.Button Btn_cut;
+        private System.Windows.Forms.Button Btn_paste;
     }
 }
 
