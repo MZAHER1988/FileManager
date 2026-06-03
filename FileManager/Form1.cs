@@ -1,8 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
-using Microsoft.VisualBasic;
 
 namespace FileManager
 {
@@ -524,7 +524,7 @@ namespace FileManager
                 }
                 if (newName == currentlySelectedItemName)                                       // Check if the new name is the same as the current name
                 {
-                    continue;                                                                   // If so, do nothing and return
+                    return;                                                                   // If so, do nothing and return
                 }
 
                 string newPath = Path.Combine(filePath, newName);
