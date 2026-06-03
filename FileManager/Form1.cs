@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualBasic;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -22,6 +23,7 @@ namespace FileManager
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //ApplySimpleModernDesign();
             filePathTextBox.Text = filePath;
             LoadFilesAndDirectories();
         }
@@ -305,6 +307,8 @@ namespace FileManager
             if (e.IsSelected == false)
             {
                 // If the item is not selected, do nothing and return
+                FileNameLabel.Text = "";
+                FileTypeLabel.Text = "";
                 return;
             }
 
@@ -320,10 +324,11 @@ namespace FileManager
             {
                 var fi = new FileInfo(fullPath);
                 FileNameLabel.Text = fi.Name;
-                FileTypeLabel.Text = fi.Extension;
+                FileTypeLabel.Text = string.IsNullOrEmpty(fi.Extension) ? "Unknown file" : fi.Extension.ToUpper() + " file";
             }
             else
             {
+                currentlySelectedItemName = "";
                 FileNameLabel.Text = "";
                 FileTypeLabel.Text = "";
             }
@@ -336,7 +341,6 @@ namespace FileManager
             if (showingDrives)
             {
                 string driveRoot = currentlySelectedItemName; // Assuming the drive name is in the format "C:\"
-
 
                 if (Directory.Exists(driveRoot))
                 {
@@ -358,7 +362,6 @@ namespace FileManager
             if (Directory.Exists(fullPath))
             {
                 previousFilePath = filePath; // Store the current file path before navigating into the new directory, used for error handling and navigation purposes
-
                 filePath = fullPath;
                 filePathTextBox.Text = filePath;
                 LoadFilesAndDirectories();
@@ -430,7 +433,6 @@ namespace FileManager
                 }
                 break;
             }
-
         }
 
         private void NewFileButton_Click(object sender, EventArgs e)
@@ -475,12 +477,19 @@ namespace FileManager
                     {
                     }
                     LoadFilesAndDirectories();
+                    break;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show("You do not have permission to create a file in this location.", "Access denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    break;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error creating new file: " + ex.Message);
                 }
-                break;
+
+
             }
         }
 
@@ -658,7 +667,6 @@ namespace FileManager
                 LoadFilesAndDirectories();
                 return;
             }
-            //string destinationPath = Path.Combine(filePath, currentlySelectedItemName + "_copy");   // Construct the full path for the copied item, appending "_copy" to the original name
             clipboardPath = sourcePath; // Store the path of the item being copied in the clipboard variable for later use in the paste operation
             isCutOperation = false; // Set the flag to indicate that the current clipboard operation is a copy operation, used for paste functionality
             MessageBox.Show($"'{currentlySelectedItemName}' has been copied to clipboard. Please navigate to the desired location and click Paste to complete the operation.");
@@ -759,5 +767,69 @@ namespace FileManager
                 MessageBox.Show("Error pasting item: " + ex.Message);
             }
         }
+
+
+
+
+
+
+
+        private void ApplySimpleModernDesign()
+        {
+            this.BackColor = Color.FromArgb(245, 247, 250);
+            this.Font = new Font("Segoe UI", 10);
+            this.StartPosition = FormStartPosition.CenterScreen;
+
+            filePathTextBox.Font = new Font("Segoe UI", 10);
+            filePathTextBox.BackColor = Color.White;
+            filePathTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+
+            listView1.BackColor = Color.White;
+            listView1.ForeColor = Color.FromArgb(17, 24, 39);
+            listView1.Font = new Font("Segoe UI", 9);
+            listView1.BorderStyle = BorderStyle.FixedSingle;
+
+            FileNameLabel.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            FileTypeLabel.Font = new Font("Segoe UI", 9);
+            FileNameLabel.ForeColor = Color.FromArgb(55, 65, 81);
+            FileTypeLabel.ForeColor = Color.FromArgb(55, 65, 81);
+
+            StyleButton(backButton, Color.White, Color.FromArgb(37, 99, 235));
+            StyleButton(goButton, Color.White, Color.FromArgb(37, 99, 235));
+
+            StyleButton(Btn_copy);
+            StyleButton(Btn_cut);
+            StyleButton(Btn_paste);
+            StyleButton(newFolderButton);
+            StyleButton(newFileButton);
+            StyleButton(renameButton);
+
+            StyleButton(deleteButton, Color.FromArgb(220, 38, 38), Color.White);
+        }
+
+
+        private void StyleButton(Button button)
+        {
+            StyleButton(button, Color.FromArgb(37, 99, 235), Color.White);
+        }
+
+        private void StyleButton(Button button, Color backColor, Color foreColor)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.BackColor = backColor;
+            button.ForeColor = foreColor;
+            button.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            button.Height = 30;
+            button.Cursor = Cursors.Hand;
+            button.FlatAppearance.BorderSize = 1;
+            button.FlatAppearance.BorderColor = Color.FromArgb(209, 213, 219);
+        }
+
+
+
+
+
+
+
     }
 }
