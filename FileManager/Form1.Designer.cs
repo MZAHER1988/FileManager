@@ -247,6 +247,7 @@
             // 
             // Btn_copy
             // 
+            this.Btn_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Btn_copy.BackColor = System.Drawing.SystemColors.Highlight;
             this.Btn_copy.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Btn_copy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -263,6 +264,7 @@
             // 
             // Btn_cut
             // 
+            this.Btn_cut.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Btn_cut.BackColor = System.Drawing.SystemColors.Highlight;
             this.Btn_cut.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Btn_cut.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -279,6 +281,7 @@
             // 
             // Btn_paste
             // 
+            this.Btn_paste.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Btn_paste.BackColor = System.Drawing.SystemColors.Highlight;
             this.Btn_paste.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Btn_paste.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

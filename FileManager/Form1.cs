@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualBasic;
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -13,8 +12,8 @@ namespace FileManager
         private string currentlySelectedItemName = "";
         private string previousFilePath = "";                                   // Variable to store the previous file path for error handling and navigation purposes
         private bool showingDrives = false;
-        private string clipboardPath = ""; // Variable to store the path of the item being copied or cut, used for paste functionality
-        private bool isCutOperation = false; // Flag to indicate whether the current clipboard operation is a cut (move) or copy, used for paste functionality
+        private string clipboardPath = "";                                      // Variable to store the path of the item being copied or cut, used for paste functionality
+        private bool isCutOperation = false;                                    // Flag to indicate whether the current clipboard operation is a cut (move) or copy, used for paste functionality
 
         public Form1()
         {
@@ -23,7 +22,6 @@ namespace FileManager
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //ApplySimpleModernDesign();
             filePathTextBox.Text = filePath;
             LoadFilesAndDirectories();
         }
@@ -56,7 +54,7 @@ namespace FileManager
 
         private void LoadFilesAndDirectories()
         {
-            bool isBeginUpdateCalled = false;                       // Flag to track if BeginUpdate has been called, to ensure EndUpdate is called appropriately
+            bool isBeginUpdateCalled = false;                                  // Flag to track if BeginUpdate has been called, to ensure EndUpdate is called appropriately
             try
             {
                 if (!Directory.Exists(filePath))
@@ -228,14 +226,28 @@ namespace FileManager
         private void LoadButtonAction()
         {
             RemoveBackSlash();
-            string input = (filePathTextBox.Text ?? "").Trim(); // Safely trim the text box input, handling null values
+            string input = (filePathTextBox.Text ?? "").Trim();                                     // Safely trim the text box input, handling null values
+
+            if (!showingDrives && !string.IsNullOrEmpty(currentlySelectedItemName))
+            {
+                string selectedPath = Path.Combine(filePath, currentlySelectedItemName);            // Construct the full path of the currently selected item in the list view
+
+                if (Directory.Exists(selectedPath))
+                {
+                    previousFilePath = filePath;            // Store the current file path before attempting to load the new path, used for error handling and navigation purposes
+                    filePath = selectedPath;
+                    filePathTextBox.Text = filePath;
+                    LoadFilesAndDirectories();
+                    return;
+                }
+            }
 
             if (!Directory.Exists(input))
             {
                 MessageBox.Show("Please enter or select a valid folder path.", "Wrong", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            previousFilePath = filePath; // Store the current file path before attempting to load the new path, used for error handling and navigation purposes
+            previousFilePath = filePath;                   // Store the current file path before attempting to load the new path, used for error handling and navigation purposes
             filePath = input;
             LoadFilesAndDirectories();
         }
@@ -249,7 +261,7 @@ namespace FileManager
                     MessageBox.Show("Current path is invalid. Cannot navigate back.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                // Alternative approach using Directory.GetParent
+                
                 DirectoryInfo parentDir = Directory.GetParent(filePath);                    // Get the parent directory of the current path
                 if (parentDir != null)                                                      // Check if the parent directory exists
                 {
@@ -271,12 +283,10 @@ namespace FileManager
 
         private void RemoveBackSlash()
         {
-            //string path = filePathTextBox.Text.Trim();
-            string path = (filePathTextBox.Text ?? "").Trim(); // Safely trim the text box input, handling null values
+            string path = (filePathTextBox.Text ?? "").Trim();          // Safely trim the text box input, handling null values
 
             if (string.IsNullOrEmpty(path))
             {
-                // If the path is empty after trimming, do nothing and return
                 return;
             }
 
@@ -299,7 +309,7 @@ namespace FileManager
         {
             if (showingDrives)
             {
-                currentlySelectedItemName = e.Item.Text; // Get the name of the currently selected drive in the list view
+                currentlySelectedItemName = e.Item.Text;        // Get the name of the currently selected drive in the list view
                 FileNameLabel.Text = e.Item.Text;
                 FileTypeLabel.Text = "Drive";
                 return;
@@ -488,8 +498,6 @@ namespace FileManager
                 {
                     MessageBox.Show("Error creating new file: " + ex.Message);
                 }
-
-
             }
         }
 
@@ -658,7 +666,7 @@ namespace FileManager
                 MessageBox.Show("Please select a file or folder to copy.");
                 return;
             }
-            string sourcePath = Path.Combine(filePath, currentlySelectedItemName);                // Construct the full path of the selected item to be copied
+            string sourcePath = Path.Combine(filePath, currentlySelectedItemName);                  // Construct the full path of the selected item to be copied
             bool isDirectory = Directory.Exists(sourcePath);                                        // Check if the selected item is a directory
             bool isFile = File.Exists(sourcePath);                                                  // Check if the selected item is a file
             if (!isDirectory && !isFile)                                                            // If the selected item does not exist, show an error message
@@ -667,8 +675,8 @@ namespace FileManager
                 LoadFilesAndDirectories();
                 return;
             }
-            clipboardPath = sourcePath; // Store the path of the item being copied in the clipboard variable for later use in the paste operation
-            isCutOperation = false; // Set the flag to indicate that the current clipboard operation is a copy operation, used for paste functionality
+            clipboardPath = sourcePath;             // Store the path of the item being copied in the clipboard variable for later use in the paste operation
+            isCutOperation = false;                 // Set the flag to indicate that the current clipboard operation is a copy operation, used for paste functionality
             MessageBox.Show($"'{currentlySelectedItemName}' has been copied to clipboard. Please navigate to the desired location and click Paste to complete the operation.");
         }
 
@@ -684,7 +692,7 @@ namespace FileManager
                 MessageBox.Show("Please select a file or folder to cut.");
                 return;
             }
-            string sourcePath = Path.Combine(filePath, currentlySelectedItemName);                // Construct the full path of the selected item to be cut
+            string sourcePath = Path.Combine(filePath, currentlySelectedItemName);                  // Construct the full path of the selected item to be cut
             bool isDirectory = Directory.Exists(sourcePath);                                        // Check if the selected item is a directory
             bool isFile = File.Exists(sourcePath);                                                  // Check if the selected item is a file
             if (!isDirectory && !isFile)                                                            // If the selected item does not exist, show an error message
@@ -693,8 +701,8 @@ namespace FileManager
                 LoadFilesAndDirectories();
                 return;
             }
-            clipboardPath = sourcePath; // Store the path of the item being cut in the clipboard variable for later use in the paste operation
-            isCutOperation = true; // Set the flag to indicate that the current clipboard operation is a cut (move) operation, used for paste functionality
+            clipboardPath = sourcePath;             // Store the path of the item being cut in the clipboard variable for later use in the paste operation
+            isCutOperation = true;                  // Set the flag to indicate that the current clipboard operation is a cut (move) operation, used for paste functionality
         }
 
         private void Btn_paste_Click(object sender, EventArgs e)
@@ -718,40 +726,39 @@ namespace FileManager
             {
 
 
-                string ItemName = Path.GetFileName(clipboardPath.TrimEnd('\\')); // This should be set to the path of the item being copied or cut, which can be stored in a variable when the copy or cut action is performed
-                string destinationPath = Path.Combine(filePath, ItemName); // Construct the full path for the pasted item in the current directory
-                //string destinationPath = GetUniquePath(filePath, ItemName); // Construct the full path for the pasted item in the current directory
+                string ItemName = Path.GetFileName(clipboardPath.TrimEnd('\\'));            // This should be set to the path of the item being copied or cut, which can be stored in a variable when the copy or cut action is performed
+                string destinationPath = Path.Combine(filePath, ItemName);                  // Construct the full path for the pasted item in the current directory
                 if (File.Exists(destinationPath) || Directory.Exists(destinationPath))
                 {
-                    destinationPath = GetUniquePath(filePath, ItemName); // Generate a unique name for the pasted item to avoid name conflicts, by appending a number to the original name
+                    destinationPath = GetUniquePath(filePath, ItemName);                    // Generate a unique name for the pasted item to avoid name conflicts, by appending a number to the original name
                 }
                 if (Directory.Exists(clipboardPath))
                 {
                     if (isCutOperation)
                     {
-                        Directory.Move(clipboardPath, destinationPath); // Move the directory for cut operation
-                        clipboardPath = ""; // Clear the clipboard after a cut operation to prevent unintended pastes
-                        isCutOperation = false; // Reset the cut operation flag after pasting to prevent unintended moves in future paste operations
+                        Directory.Move(clipboardPath, destinationPath);                     // Move the directory for cut operation
+                        clipboardPath = "";                                                 // Clear the clipboard after a cut operation to prevent unintended pastes
+                        isCutOperation = false;                                             // Reset the cut operation flag after pasting to prevent unintended moves in future paste operations
                     }
                     else
                     {
-                        CopyDirectory(clipboardPath, destinationPath); // Copy the directory for copy operation, requires implementing a method to copy directories recursively
+                        CopyDirectory(clipboardPath, destinationPath);                      // Copy the directory for copy operation, requires implementing a method to copy directories recursively
                     }
                 }
                 else if (File.Exists(clipboardPath))
                 {
                     if (isCutOperation)
                     {
-                        File.Move(clipboardPath, destinationPath); // Move the file for cut operation
-                        clipboardPath = ""; // Clear the clipboard after a cut operation to prevent unintended pastes
-                        isCutOperation = false; // Reset the cut operation flag after pasting to prevent unintended moves in future paste operations
+                        File.Move(clipboardPath, destinationPath);                          // Move the file for cut operation
+                        clipboardPath = "";                                                 
+                        isCutOperation = false;                                             
                     }
                     else
                     {
-                        File.Copy(clipboardPath, destinationPath); // Copy the file for copy operation
+                        File.Copy(clipboardPath, destinationPath);                          // Copy the file for copy operation
                     }
                 }
-                LoadFilesAndDirectories(); // Reload the files and directories to reflect the change
+                LoadFilesAndDirectories();                                                  // Reload the files and directories to reflect the change
 
             }
             catch (UnauthorizedAccessException uaEx)
@@ -767,69 +774,5 @@ namespace FileManager
                 MessageBox.Show("Error pasting item: " + ex.Message);
             }
         }
-
-
-
-
-
-
-
-        private void ApplySimpleModernDesign()
-        {
-            this.BackColor = Color.FromArgb(245, 247, 250);
-            this.Font = new Font("Segoe UI", 10);
-            this.StartPosition = FormStartPosition.CenterScreen;
-
-            filePathTextBox.Font = new Font("Segoe UI", 10);
-            filePathTextBox.BackColor = Color.White;
-            filePathTextBox.ForeColor = Color.FromArgb(17, 24, 39);
-
-            listView1.BackColor = Color.White;
-            listView1.ForeColor = Color.FromArgb(17, 24, 39);
-            listView1.Font = new Font("Segoe UI", 9);
-            listView1.BorderStyle = BorderStyle.FixedSingle;
-
-            FileNameLabel.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            FileTypeLabel.Font = new Font("Segoe UI", 9);
-            FileNameLabel.ForeColor = Color.FromArgb(55, 65, 81);
-            FileTypeLabel.ForeColor = Color.FromArgb(55, 65, 81);
-
-            StyleButton(backButton, Color.White, Color.FromArgb(37, 99, 235));
-            StyleButton(goButton, Color.White, Color.FromArgb(37, 99, 235));
-
-            StyleButton(Btn_copy);
-            StyleButton(Btn_cut);
-            StyleButton(Btn_paste);
-            StyleButton(newFolderButton);
-            StyleButton(newFileButton);
-            StyleButton(renameButton);
-
-            StyleButton(deleteButton, Color.FromArgb(220, 38, 38), Color.White);
-        }
-
-
-        private void StyleButton(Button button)
-        {
-            StyleButton(button, Color.FromArgb(37, 99, 235), Color.White);
-        }
-
-        private void StyleButton(Button button, Color backColor, Color foreColor)
-        {
-            button.FlatStyle = FlatStyle.Flat;
-            button.BackColor = backColor;
-            button.ForeColor = foreColor;
-            button.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            button.Height = 30;
-            button.Cursor = Cursors.Hand;
-            button.FlatAppearance.BorderSize = 1;
-            button.FlatAppearance.BorderColor = Color.FromArgb(209, 213, 219);
-        }
-
-
-
-
-
-
-
     }
 }

@@ -80,5 +80,10 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="assets\Animation1.gif" />
+    <Content Include="assets\Animation2.gif" />
+    <Content Include="assets\Animation3.gif" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
