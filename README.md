@@ -11,6 +11,17 @@ The purpose of this project was to gain hands-on experience with file system ope
 - **Open Files** – Double-click a file to open it with its default associated program.
 - **Information** – Display the name and type of the selected item.
 
+  ## Demo
+
+### Navigation and create foldr/file
+![Navigation](FileManager/assets/Animation1.gif)
+
+### File Operations (Copy Cut and Paste)
+![File Operations](FileManager/assets/Animation2.gif)
+
+### Rename and delete
+![Rename and delete](FileManager/assets/Animation3.gif)
+
 ## Requirements
 
 - Windows operating system
